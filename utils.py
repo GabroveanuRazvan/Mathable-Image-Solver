@@ -397,60 +397,23 @@ def store_template_numbers2(offset = 5,store_path = "./templates/sample2"):
             index += 1
 
 
-def store_thresholded_templates(source_path = "./templates/sample4",destination_path = "./thresholded_templates/sample4"):
+def store_binary_templates(thresh = 100,source_path = "./templates/sample2",destination_path = "./templates_binary/sample2"):
+    """
+
+    Reads templates and applies a threshold then stores them.
+
+    :param thresh: threshold for the template numbers
+    :param source_path: path to get the template images
+    :param destination_path: path to store the template images
+    :return:
+    """
     paths = sorted(os.listdir(source_path))
 
     for path in paths:
         img = cv.imread(os.path.join(source_path,path))
         img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
-        _, img = cv.threshold(img,100,255,cv.THRESH_BINARY_INV)
+        _, img = cv.threshold(img,thresh,255,cv.THRESH_BINARY_INV)
         cv.imwrite(os.path.join(destination_path,path), img)
 
-def classify_number(patch):
-
-    maxi = -np.inf
-    chosen_number = -1
-    numbers = get_mathable_pieces_numbers()
-
-    for number in numbers:
-        template = cv.imread("./thresholded_templates/sample4/" + str(number) + ".jpg")
-        template = cv.cvtColor(template, cv.COLOR_BGR2GRAY)
-        corr = cv.matchTemplate(patch,template, cv.TM_CCOEFF_NORMED)
-        corr=np.max(corr)
-
-        if corr > maxi:
-            maxi = corr
-            chosen_number = number
-
-
-    return chosen_number
-
-def get_number_pos(thresholded_image,offset):
-    lines_vertical,lines_horizontal = get_lines_coords()
-
-    coords=[]
-    patches = []
-
-    for i in range(len(lines_horizontal)-1):
-        for j in range(len(lines_vertical)-1):
-
-            y_min = lines_vertical[j][0][0] + offset
-            y_max = lines_vertical[j + 1][1][0] - offset
-            x_min = lines_horizontal[i][0][1] + offset
-            x_max = lines_horizontal[i + 1][1][1] - offset
-
-            patch = thresholded_image[x_min:x_max,y_min:y_max].copy()
-            patches.append(patch)
-
-            mean = np.mean(patch)
-            h,w = patch.shape
-
-            if mean > (255 * 15) / (h * w) :
-                predicted_number = classify_number(patch)
-                coords.append((i,j,predicted_number))
-            #     show_image_matplot("patch " + str(i)+ " " + str(j) + " "+ str(predicted_number), patch)
-            # else:
-            #     show_image_matplot("patch " + str(i)+ " " + str(j), patch)
-    return coords,patches
 

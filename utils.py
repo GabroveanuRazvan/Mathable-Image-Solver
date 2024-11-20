@@ -416,4 +416,96 @@ def store_binary_templates(thresh = 100,source_path = "./templates/sample2",dest
         _, img = cv.threshold(img,thresh,255,cv.THRESH_BINARY_INV)
         cv.imwrite(os.path.join(destination_path,path), img)
 
+def crop_and_store_templates(templates_path = "./templates_binary/sample2",store_path = "./templates_cropped"):
 
+    """
+    Reads binary templates from templates path, cropps them and stores them to store path.
+    :param templates_path:
+    :param store_path:
+    :return: None
+    """
+
+    files = os.listdir(templates_path)
+
+    for file in tqdm(files):
+        path = templates_path + "/" + file
+        template = cv.imread(path)
+        template = cv.cvtColor(template, cv.COLOR_BGR2GRAY)
+
+        height,width= template.shape
+        x_min = -1
+        x_max = -1
+        y_min = -1
+        y_max = -1
+
+        for i in range(0,height):
+            if y_min != -1:
+                break
+            for j in range(0,width):
+                if template[i,j] == 255:
+                    y_min = i
+                    break
+
+        for j in range(0,width):
+            if x_min != -1:
+                break
+            for i in range(0,height):
+                if template[i,j] == 255:
+                    x_min = j
+                    break
+
+        for i in range(height-1,0,-1):
+            if y_max != -1:
+                break
+            for j in range(0,width):
+                if template[i,j] == 255:
+                    y_max = i
+                    break
+
+        for j in range(width-1,0,-1):
+            if x_max != -1:
+                break
+            for i in range(0,height):
+                if template[i,j] == 255:
+                    x_max = j
+                    break
+
+        cropped_template = template[y_min:y_max, x_min:x_max]
+
+        cv.imwrite(store_path+"/"+file,cropped_template)
+
+def select_and_save_roi(image_path, save_path):
+
+    """
+    Reads and image from image_path, selects with ROI an area and saves it to save_path.
+    :param image_path:
+    :param save_path:
+    :return: None
+    """
+
+    image = cv.imread(image_path)
+
+    roi = cv.selectROI("Select ROI", image, showCrosshair=True)
+    cv.destroyWindow("Select ROI")
+
+    x, y, w, h = map(int, roi)
+    selected_area = image[y:y+h, x:x+w]
+
+    cv.imwrite(save_path, selected_area)
+
+def rewrite_all(src_path = "./templates_handmade/new",dest_path = "./templates_cropped"):
+
+    """
+    Copyes and rewrites if there are name collisions the giles from source to destination.
+    :param src_path:
+    :param dest_path:
+    :return: None
+    """
+
+    files = os.listdir(src_path)
+
+    for file in files:
+        old_path = src_path + "/" + file
+        new_path = dest_path + "/" + file
+        image = cv.imread(old_path)
+        cv.imwrite(new_path,image)

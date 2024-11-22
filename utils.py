@@ -509,3 +509,33 @@ def rewrite_all(src_path = "./templates_handmade/new",dest_path = "./templates_c
         new_path = dest_path + "/" + file
         image = cv.imread(old_path)
         cv.imwrite(new_path,image)
+
+
+def process_turns(data_id,src_dir = "./antrenare"):
+    """
+
+    :param data_id: value between 1 and 4
+    :param src_dir: source directory of where the file data_id_turns.txt are located
+    :return: [(player,current turn,end turn)]
+    """
+    result = []
+    path = src_dir + "/" + str(data_id) + "_turns.txt"
+
+    with open(path) as file:
+        current_line = file.readline()
+        next_line = file.readline()
+
+        while next_line:
+            current_player = current_line.strip().split()[0]
+            current_turn = current_line.strip().split()[1]
+            end_turn = next_line.strip().split()[1]
+            result.append((current_player, int(current_turn), int(end_turn)))
+
+            current_line = next_line
+            next_line = file.readline()
+
+        current_player = current_line.strip().split()[0]
+        current_turn = current_line.strip().split()[1]
+        result.append((current_player, int(current_turn),50))
+
+    return result

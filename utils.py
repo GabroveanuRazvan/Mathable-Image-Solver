@@ -536,6 +536,6 @@ def process_turns(data_id,src_dir = "./antrenare"):
 
         current_player = current_line.strip().split()[0]
         current_turn = current_line.strip().split()[1]
-        result.append((current_player, int(current_turn),50))
+        result.append((current_player, int(current_turn),51))
 
     return result

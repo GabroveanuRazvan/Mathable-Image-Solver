@@ -8,4 +8,4 @@ Player1 35 47
 Player2 38 24
 Player1 41 70
 Player2 44 28
-Player1 47 26
+Player1 47 36

@@ -7,9 +7,18 @@ import cv2 as cv
 
 class Solver():
 
-    def __init__(self,data_set_id):
-
+    def __init__(self,data_set_id,src_images_dir = "./antrenare", output_dest_dir = "./343_Gabroveanu_Razvan",templates_dir ="./templates_cropped"):
+        """
+        Initializes a new solver object.
+        :param data_set_id: Number between 1 and 4.
+        :param src_images_dir: The source path of the directory where the images are stored.
+        :param output_dest_dir: The destination path of the directory where the classification files will be stores.
+        :param templates_dir: The source path of the directory where the templates are stored.
+        """
         self.data_set_id = data_set_id
+        self.src_images_dir = src_images_dir
+        self.output_dest_dir = output_dest_dir
+        self.templates_dir = templates_dir
 
         self.table_configuration = np.full((14,14),-1)
         self.table_configuration[6,6] = 1
@@ -44,13 +53,16 @@ class Solver():
         ])
 
 
-    def reset(self,output_dest_path = "./343_Gabroveanu_Razvan"):
-
-        files = [x for x in os.listdir(output_dest_path) if x[0] == str(self.data_set_id)]
+    def reset(self):
+        """
+        Resets the solver by deleting all the data in the output directory and by resetting the table configuration.
+        :return: None
+        """
+        files = [x for x in os.listdir(self.output_dest_dir) if x[0] == str(self.data_set_id)]
 
         for file in files:
-            if os.path.exists(os.path.join(output_dest_path,file)):
-                os.remove(os.path.join(output_dest_path,file))
+            if os.path.exists(os.path.join(self.output_dest_dir,file)):
+                os.remove(os.path.join(self.output_dest_dir,file))
 
         self.table_configuration = np.full((14,14),-1)
         self.table_configuration[6,6] = 1
@@ -59,12 +71,16 @@ class Solver():
         self.table_configuration[7,7] = 4
 
 
-    def solve(self, src_dir ="./antrenare", output_dest_dir ="./343_Gabroveanu_Razvan"):
-
-        self.reset(output_dest_dir)
+    def solve(self):
+        """
+        Resets the solver and attempts to solve the classification problem.
+        Stores the classification files into the output directory.
+        :return:
+        """
+        self.reset()
 
         # extract the game tables and its relevant data
-        game_tables = utils.extract_game(utils.get_image_paths(src_dir, self.data_set_id))
+        game_tables = utils.extract_game(utils.get_image_paths(self.src_images_dir, self.data_set_id))
         relevant_game_tables = utils.extract_relevant_game(game_tables)
 
         assert len(game_tables) > 0, "Game tables not found"
@@ -73,7 +89,7 @@ class Solver():
         # prefix of where to store the predicted data
         output_file_prefix = "/" + str(self.data_set_id) + "_"
 
-        turns = utils.process_turns(self.data_set_id,src_dir)
+        turns = utils.process_turns(self.data_set_id,self.src_images_dir)
         current_turn_index = 0
         current_player,start_turn,end_turn = turns[current_turn_index]
         current_score = 0
@@ -89,7 +105,7 @@ class Solver():
             result_dict = self.match_numbers(table_binary,8)
 
             # forge the output path
-            output_file_path = output_dest_dir + output_file_prefix
+            output_file_path = self.output_dest_dir + output_file_prefix
 
             if i in range(0,9):
                 output_file_path = output_file_path + "0"
@@ -118,11 +134,11 @@ class Solver():
 
             if i+1 not in range(start_turn-1,end_turn-1):
 
-                with open(output_dest_dir + "/" + str(self.data_set_id) + "_scores.txt", "a") as file:
+                with open(self.output_dest_dir + "/" + str(self.data_set_id) + "_scores.txt", "a") as file:
                     file.write(current_player + " " + str(start_turn) + " " + str(current_score))
                     if i != 49:
                         file.write("\n")
-                with open(output_dest_dir + "/" + str(self.data_set_id) + "_turns.txt", "a") as file:
+                with open(self.output_dest_dir + "/" + str(self.data_set_id) + "_turns.txt", "a") as file:
                     file.write(current_player + " " + str(start_turn))
                     if i != 49:
                         file.write("\n")
@@ -134,6 +150,12 @@ class Solver():
 
 
     def match_numbers(self,binary_image, offset):
+        """
+        Iterates through the current image and classifies each cell that has not been classified yet.
+        :param binary_image: A binary image of a relevant game table.
+        :param offset: Pixels which will be cropped from the extracted patches.
+        :return: {(row,col): predicted_number}
+        """
         # get the vertical and horizontal line coordinates
         lines_vertical,lines_horizontal = utils.get_lines_coords()
 
@@ -170,8 +192,16 @@ class Solver():
 
         return coords
 
-    def classify_number(self,patch,possible_numbers,templates_path = "./templates_cropped"):
-
+    def classify_number(self, patch, possible_numbers):
+        """
+        Tries to classify a number in the given patch based on the provided templates.
+        1. Tries to match the template of the one-digit numbers from possible_numbers and returns if the correlation is high enough.
+        2. Tries to match the template of the two-digit numbers from possible_numbers.
+        3. Tries to match any template in reverse order if the above 2 tries were not enough
+        :param patch: A binary image representing a patch from a relevant game table.
+        :param possible_numbers: A list of the possible values that the current cell can take based on the game logic.
+        :return: Integer of predicted number.
+        """
         max_corr = -np.inf
         chosen_number = -2
 
@@ -181,7 +211,7 @@ class Solver():
         # test the correlation on the possible_numbers
         for number in more_digits_numbers:
 
-            path = templates_path+ "/" + str(number) + ".jpg"
+            path = self.templates_dir + "/" + str(number) + ".jpg"
 
             # skip if the current number is not a valid piece
             if not os.path.exists(path):
@@ -202,7 +232,7 @@ class Solver():
 
         for number in one_digit_numbers:
 
-            path = templates_path+ "/" + str(number) + ".jpg"
+            path = self.templates_dir + "/" + str(number) + ".jpg"
 
             # skip if the current number is not a valid piece
             if not os.path.exists(path):
@@ -228,7 +258,7 @@ class Solver():
 
         for number in all_numbers:
 
-            path = templates_path+ "/" + str(number) + ".jpg"
+            path = self.templates_dir + "/" + str(number) + ".jpg"
 
             template = cv.imread(path)
             template = cv.cvtColor(template, cv.COLOR_BGR2GRAY)
@@ -246,6 +276,25 @@ class Solver():
 
 
     def get_neighbour_cells_indexes(self, i, j):
+        """
+        Gets a list of lists of tuples representing the cell neighbours that are not empty on all axis.
+                             (i-2,j)
+                                |
+                                |
+                             (i-1,j)
+                                |
+                                |
+        (i,j-2) -- (i,j-1) -- (i,j) -- (i,j+1) -- (i,j+2)
+                                |
+                                |
+                             (i+1,j)
+                                |
+                                |
+                             (i+2,j)
+        :param i: Row index.
+        :param j: Column index.
+        :return: [[(row,column)]
+        """
         neighbours = []
 
         # UP
@@ -265,7 +314,13 @@ class Solver():
 
 
     def get_possible_values(self,i,j):
-
+        """
+        Based on the non-empty neighbours that are not empty,
+        computes all possible values the current cell can take using any operator on any of 2 axis neighbours.
+        :param i: Row index.
+        :param j: Column index.
+        :return: List of unique possible values.
+        """
         neighbours_indexes = self.get_neighbour_cells_indexes(i,j)
 
         possible_piece_values = []
@@ -317,7 +372,13 @@ class Solver():
 
 
     def calculate_score(self,i,j):
-
+        """
+        Computes the current score of the last places piece denoted by the row and column index.
+        Takes into account the table constraints and multiple obtained score.
+        :param i: Row index.
+        :param j: Column index.
+        :return: Current score.
+        """
         assert self.table_configuration[i,j] != -1, "A cell must have a value in order to calculate a score."
 
         neighbours_indexes = self.get_neighbour_cells_indexes(i,j)

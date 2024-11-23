@@ -256,15 +256,43 @@ class Solver():
         # if there are no detections just test on all templates
         all_numbers = utils.get_mathable_pieces_numbers()
 
-        for number in all_numbers:
+        one_digit_numbers = [x for x in all_numbers if x < 10]
+        more_digits_numbers = [x for x in all_numbers if x >= 10]
+
+        for number in more_digits_numbers:
 
             path = self.templates_dir + "/" + str(number) + ".jpg"
+
+            # skip if the current number is not a valid piece
+            if not os.path.exists(path):
+                continue
 
             template = cv.imread(path)
             template = cv.cvtColor(template, cv.COLOR_BGR2GRAY)
 
-            corr = cv.matchTemplate(patch,template, cv.TM_CCOEFF_NORMED)
-            corr=np.max(corr)
+            corr = cv.matchTemplate(patch, template, cv.TM_CCOEFF_NORMED)
+            corr = np.max(corr)
+
+            if corr > max_corr:
+                max_corr = corr
+                chosen_number = number
+
+        if max_corr >= 0.75:
+            return chosen_number
+
+        for number in one_digit_numbers:
+
+            path = self.templates_dir + "/" + str(number) + ".jpg"
+
+            # skip if the current number is not a valid piece
+            if not os.path.exists(path):
+                continue
+
+            template = cv.imread(path)
+            template = cv.cvtColor(template, cv.COLOR_BGR2GRAY)
+
+            corr = cv.matchTemplate(patch, template, cv.TM_CCOEFF_NORMED)
+            corr = np.max(corr)
 
             if corr > max_corr:
                 max_corr = corr

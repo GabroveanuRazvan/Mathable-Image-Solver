@@ -511,9 +511,33 @@ def rewrite_all(src_path = "./templates_handmade/new",dest_path = "./templates_c
         cv.imwrite(new_path,image)
 
 
-def process_turns(data_id,src_dir = "./antrenare"):
+def move_train_data(train_number,src_path = "./antrenare",dest_path = "./train"):
+
+    """
+    Moves all training data labeled with train_number from src_path to dest_path.
+    :param train_number:
+    :param src_path:
+    :param dest_path:
+    :return: None
     """
 
+    img_prefix = str(train_number)+ "_"
+
+    for i in range(9):
+        img_name = img_prefix + "0" +str(i+1) + ".jpg"
+        img_path = src_path + "/" + img_name
+        img = cv.imread(img_path)
+        cv.imwrite(dest_path +"/" + img_name, img)
+
+    for i in range(9,50):
+        img_path = src_path + "/" + img_prefix + str(i+1) + ".jpg"
+        img_name = img_prefix +str(i+1) + ".jpg"
+        img = cv.imread(img_path)
+        cv.imwrite(dest_path +"/" + img_name, img)
+
+def process_turns(data_id,src_dir = "./antrenare"):
+    """
+    Parses the turns file and returns an array of tuples with the current player, the start turn and the end turn.
     :param data_id: value between 1 and 4
     :param src_dir: source directory of where the file data_id_turns.txt are located
     :return: [(player,current turn,end turn)]

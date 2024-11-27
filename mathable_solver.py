@@ -52,6 +52,9 @@ class Solver():
 
         ])
 
+        # create the output directory recursively if it does not exist
+        os.makedirs(self.output_dest_dir,exist_ok=True)
+
 
     def reset(self):
         """

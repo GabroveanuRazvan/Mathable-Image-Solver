@@ -92,7 +92,7 @@ class Solver():
         # prefix of where to store the predicted data
         output_file_prefix = "/" + str(self.data_set_id) + "_"
 
-        turns = utils.process_turns(self.data_set_id,self.src_images_dir)
+        turns = utils.process_turns(self.data_set_id, self.src_images_dir)
         current_turn_index = 0
         current_player,start_turn,end_turn = turns[current_turn_index]
         current_score = 0

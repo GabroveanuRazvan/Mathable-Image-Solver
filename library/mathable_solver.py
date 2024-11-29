@@ -34,6 +34,7 @@ class Solver():
         self.TIMES_3 = 6
 
         self.table_constraints = np.array([
+
             [self.TIMES_3,0,0,0,0,0,self.TIMES_3,self.TIMES_3,0,0,0,0,0,self.TIMES_3],
             [0,self.TIMES_2,0,0,self.DIV,0,0,0,0,self.DIV,0,0,self.TIMES_2,0],
             [0,0,self.TIMES_2,0,0,self.SUB,0,0,self.SUB,0,0,self.TIMES_2,0,0],

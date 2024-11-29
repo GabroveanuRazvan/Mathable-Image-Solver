@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-def show_image_cv(title,image,fx=1,fy=1,output = True):
+def show_image_cv(title,image,fx=1.0,fy=1.0,output = True):
     """
     Displays an imagine using opencv
 
@@ -25,7 +25,7 @@ def show_image_cv(title,image,fx=1,fy=1,output = True):
     cv.waitKey(0)
     cv.destroyAllWindows()
 
-def show_image_matplot(title, image,fx=1,fy=1,output = True):
+def show_image_matplot(title, image,fx=1.0,fy=1.0,output = True):
 
     """
     Displays an image using matplotlib
@@ -112,10 +112,10 @@ def get_game_countour(image,output = False):
     masked_image = get_outer_masked_image(image)
     masked_image_grey = cv.cvtColor(masked_image, cv.COLOR_BGR2GRAY)
 
-    show_image_cv("masked_image_grey",masked_image_grey,output = output)
+    show_image_cv("masked_image_grey",masked_image_grey,output = output,fx=0.3,fy=0.3)
 
     masked_image_grey = cv.medianBlur(masked_image_grey,3)
-    show_image_cv('median_blur_image',masked_image_grey,output = output)
+    show_image_cv('median_blur_image',masked_image_grey,output = output,fx=0.3,fy=0.3)
 
     contours, _ = cv.findContours(masked_image_grey,  cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
@@ -147,7 +147,7 @@ def get_game_countour(image,output = False):
     cv.circle(image_copy,tuple(top_right),20,(0,0,255),-1)
     cv.circle(image_copy,tuple(bottom_left),20,(0,0,255),-1)
     cv.circle(image_copy,tuple(bottom_right),20,(0,0,255),-1)
-    show_image_cv("detected corners",image_copy,output = output)
+    show_image_cv("detected corners",image_copy,output = output,fx=0.3,fy=0.3)
 
 
     width = 810

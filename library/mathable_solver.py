@@ -1,7 +1,7 @@
 
 import numpy as np
 import os
-import utils
+from library import utils
 from tqdm import tqdm
 import cv2 as cv
 

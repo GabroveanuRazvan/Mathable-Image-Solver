@@ -557,3 +557,29 @@ def process_turns(data_id,src_dir = "./antrenare"):
         result.append((current_player, int(current_turn),51))
 
     return result
+
+
+def visualize_predictions(data_set_id,src_img_dir,src_output_dir):
+
+    '''
+
+    Shows each image with its classfied prediction.
+    :param data_set_id:
+    :param src_img_dir: source of the images
+    :param src_output_dir: source of the output files
+    :return:
+    '''
+
+    paths = get_image_paths(src_img_dir,data_set_id)
+
+    for idx,path in enumerate(paths):
+        img = cv.imread(path)
+        prediction_path = src_output_dir + '/' + str(data_set_id) + '_'
+        if idx + 1 in range(1,10):
+            prediction_path = prediction_path + '0'
+
+        prediction_path += str(idx+1) + '.txt'
+
+        with open(prediction_path,'r') as f:
+            output = f.readline()
+            show_image_matplot(output,img,fx=0.3,fy=0.3)

@@ -36,7 +36,7 @@ predictions_path_root = "../../343_Gabroveanu_Razvan/"
 #change this on your machine to point to the ground-truth test
 # gt_path_root = "fake_test_gt/"
 
-gt_path_root = "../../antrenare/"
+gt_path_root = "../../GT/"
 
 
 
